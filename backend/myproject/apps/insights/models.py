@@ -1,5 +1,5 @@
 from django.db import models
-from apps.repositories.models import Repository
+from myproject.apps.repositories.models import Repository
 
 class ProjectInsight(models.Model):
     # Link this insight to a specific repository
