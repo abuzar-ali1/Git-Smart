@@ -11,6 +11,9 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
 from pathlib import Path
+import os
+import dj_database_url
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -27,6 +30,11 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+# it load the environ veraible from the .env
+
+
+load_dotenv()
+
 
 # Application definition
 
@@ -37,6 +45,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework'
 ]
 
 MIDDLEWARE = [
@@ -74,9 +83,22 @@ WSGI_APPLICATION = 'myproject.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'gitsmart_db',          # The name you gave your DB
+        'USER': 'abuzar',        # Your Postgres username
+        'PASSWORD': 'abuzar',    # Your Postgres password
+        'HOST': 'localhost',            # Since it's on your computer
+        'PORT': '5432',                 # Default Postgres port
     }
+}
+
+
+DATABASES = {
+    'default': dj_database_url.config(
+        default=os.environ.get('DATABASE_URL'),
+        conn_max_age=600,
+        ssl_require=True # This is the important line for Cloud DBs!
+    )
 }
 
 
