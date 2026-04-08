@@ -1,11 +1,11 @@
 from rest_framework import serializers
-from .models import ProjectInsight 
+from .models import Insight 
 
 
 
-class InsightSerializer(serializers.ModelSerailizer):
+class InsightSerializer(serializers.ModelSerializer):
     class Meta:
-        model = ProjectInsight
+        model = Insight
         fields = '__all__'
 
 

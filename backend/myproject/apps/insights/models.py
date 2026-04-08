@@ -1,7 +1,7 @@
 from django.db import models
 from myproject.apps.repositories.models import Repository
 
-class ProjectInsight(models.Model):
+class Insight(models.Model):
     # Link this insight to a specific repository
     repository = models.OneToOneField(Repository, on_delete=models.CASCADE, related_name="insight")
     

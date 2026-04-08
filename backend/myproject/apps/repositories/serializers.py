@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from .models import Repository
-from insights.serializers import InsightSerializer
+from ..insights.serializers import InsightSerializer
 
 
 

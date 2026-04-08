@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from .models import Repository
 from .serializers import RepositorySerializer
 from .services import fetch_and_sync_github_repos 
+# from django.contrib.auth.models import User
 
 class RepositoryViewSet(viewsets.ModelViewSet):
     queryset = Repository.objects.all()
@@ -19,6 +20,7 @@ class RepositoryViewSet(viewsets.ModelViewSet):
             return Response({"error": "Github username is required"}, status=status.HTTP_400_BAD_REQUEST)
 
         repos = fetch_and_sync_github_repos(request.user, username)
+      
         
         if isinstance(repos, dict) and "error" in repos:
             return Response(repos, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

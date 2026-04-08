@@ -6,7 +6,7 @@ from .views import RepositoryViewSet
 
 router = DefaultRouter()
 
-router.register(r'repositories', RepositoryViewSet, basename='repository')
+router.register(r'repos', RepositoryViewSet, basename='repository')
 
 urlpatterns = [
     path('', include(router.urls)),
