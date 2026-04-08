@@ -21,6 +21,6 @@ from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/', include('myproject.apps.repositories.urls')),  # Include repository app URLs
-
+    path('api/', include('myproject.apps.repositories.urls')),  
+    path('api/', include('myproject.apps.insights.urls')),  
 ]
