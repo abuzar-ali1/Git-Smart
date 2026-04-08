@@ -1,28 +1,35 @@
-from rest_framework import viewsets, status
+from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from .models import Repository
 from .serializers import RepositorySerializer
-from .services import fetch_and_sync_github_repos 
-# from django.contrib.auth.models import User
+from .services import fetch_and_sync_github_repos
+from rest_framework.permissions import AllowAny 
+from django.contrib.auth.models import User
+
 
 class RepositoryViewSet(viewsets.ModelViewSet):
     queryset = Repository.objects.all()
     serializer_class = RepositorySerializer
+    permission_classes = [AllowAny]
 
     @action(detail=False, methods=['post'])
     def sync_github(self, request):
-        # For now, we manually provide the username. 
-        # Later, this will come from the logged-in user's profile!
         username = request.data.get('github_username')
         
+        # 1. Check if username was provided
         if not username:
-            return Response({"error": "Github username is required"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "github_username is required"}, status=400)
 
-        repos = fetch_and_sync_github_repos(request.user, username)
-      
+        user = request.user if request.user.is_authenticated else User.objects.first()
         
-        if isinstance(repos, dict) and "error" in repos:
-            return Response(repos, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        if not user:
+            return Response({"error": "No user exists. Run 'python manage.py createsuperuser'"}, status=500)
 
-        return Response({"message": f"Successfully synced {len(repos)} repositories!"})
+        try:
+            # 3. Call the service
+            repos = fetch_and_sync_github_repos(user, username)
+            return Response({"status": "success", "count": len(repos)})
+        except Exception as e:
+            # 4. This will tell you exactly why it's crashing in the Postman response!
+            return Response({"error": str(e)}, status=500)

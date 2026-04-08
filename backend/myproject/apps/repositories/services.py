@@ -10,7 +10,7 @@ def fetch_and_sync_github_repos(user, github_username):
     token = os.getenv("GITHUB_TOKEN")
     headers = {"Authorization": f"token {token}"} if token else {}
     
-    url = f"https://api.github.com/users/{github_username}/repos"
+    url = f"https://api.github.com/users/{github_username}/repos?per_page=100"
     response = requests.get(url, headers=headers)
     
     if response.status_code != 200:
