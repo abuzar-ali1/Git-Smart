@@ -6,12 +6,16 @@ from .serializers import RepositorySerializer
 from .services import fetch_and_sync_github_repos
 from rest_framework.permissions import AllowAny 
 from django.contrib.auth.models import User
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import filters
 
 
 class RepositoryViewSet(viewsets.ModelViewSet):
     queryset = Repository.objects.all()
     serializer_class = RepositorySerializer
-    permission_classes = [AllowAny]
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter]
+    filterset_fields = ['language'] 
+    search_fields = ['name', 'description'] 
 
     @action(detail=False, methods=['post'])
     def sync_github(self, request):
