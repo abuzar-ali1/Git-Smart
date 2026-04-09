@@ -23,6 +23,7 @@ class RepositoryViewSet(viewsets.ModelViewSet):
         repo_path = f"{parts[-2]}/{parts[-1]}"
 
         cached_analysis = RepoAnalysis.objects.filter(repo_full_name=repo_path).first()
+        github_data = None
 
         if not cached_analysis:
             github_data = fetch_github_repo_data(repo_path)
@@ -36,15 +37,25 @@ class RepositoryViewSet(viewsets.ModelViewSet):
                 ai_summary=ai_text,
                 top_languages={"primary": github_data.get('language')}
             )
+        else:
+            # If the repository record does not exist for this guest, we still need GitHub data for defaults.
+            if not Repository.objects.filter(guest_id=guest_id, full_name=repo_path).exists():
+                github_data = fetch_github_repo_data(repo_path)
+                if not github_data:
+                    return Response({"error": "Could not find that repo on GitHub!"}, status=404)
+
+        defaults = {
+            'name': repo_path.split('/')[-1],
+            'github_url': repo_url,
+        }
+        if github_data is not None:
+            defaults['github_created_at'] = github_data.get('created_at')
 
         # We record that THIS specific guest looked at this repo
         repo_obj, _ = Repository.objects.get_or_create(
             guest_id=guest_id,
             full_name=repo_path,
-            defaults={
-                'name': repo_path.split('/')[-1],
-                'github_url': repo_url
-            }
+            defaults=defaults
         )
 
         return Response({
