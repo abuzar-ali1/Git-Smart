@@ -51,8 +51,10 @@ INSTALLED_APPS = [
     'rest_framework',
     'myproject.apps.insights',
     'myproject.apps.repositories',
+    'myproject.apps.users',
     "corsheaders",
     'drf_spectacular',
+    'django_filters', 
 ]
 
 MIDDLEWARE = [
@@ -92,11 +94,11 @@ WSGI_APPLICATION = 'myproject.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'gitsmart_db',          # The name you gave your DB
-        'USER': 'abuzar',        # Your Postgres username
-        'PASSWORD': 'abuzar',    # Your Postgres password
-        'HOST': 'localhost',            # Since it's on your computer
-        'PORT': '5432',                 # Default Postgres port
+        'NAME': 'gitsmart_db',          
+        'USER': 'abuzar',        
+        'PASSWORD': 'abuzar',    
+        'HOST': 'localhost',        
+        'PORT': '5432',             
     }
 }
 
