@@ -51,7 +51,6 @@ INSTALLED_APPS = [
     'rest_framework',
     'myproject.apps.insights',
     'myproject.apps.repositories',
-    'myproject.apps.users',
     "corsheaders",
     'drf_spectacular',
     'django_filters', 

@@ -1,24 +1,15 @@
 from django.db import models
-from django.conf import settings
 
 class Repository(models.Model):
-    # Link this repo to a specific user
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="repositories")
+    guest_id = models.CharField(max_length=100, db_index=True) 
     
-    # Data from GitHub API
-    github_id = models.PositiveIntegerField(unique=True)
+    # GitHub Data
     name = models.CharField(max_length=255)
-    full_name = models.CharField(max_length=255)
-    html_url = models.URLField()
-    description = models.TextField(null=True, blank=True)
+    full_name = models.CharField(max_length=255) 
+    github_url = models.URLField(max_length=500)
     
-    # Stats
-    stargazers_count = models.IntegerField(default=0)
-    language = models.CharField(max_length=100, null=True, blank=True)
-    
-    # Timestamps
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    github_created_at = models.DateTimeField(null=True)
+    db_added_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return self.full_name
+        return f"{self.full_name} (Guest: {self.guest_id})"

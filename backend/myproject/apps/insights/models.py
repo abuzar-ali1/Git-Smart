@@ -16,3 +16,11 @@ class Insight(models.Model):
 
     def __str__(self):
         return f"Insight for {self.repository.name}"
+    
+
+class RepoAnalysis(models.Model):
+    # We use the repo's full name to cache the result globally
+    repo_full_name = models.CharField(max_length=255, unique=True)
+    ai_summary = models.TextField()
+    top_languages = models.JSONField(default=dict)
+    last_analyzed = models.DateTimeField(auto_now=True)    

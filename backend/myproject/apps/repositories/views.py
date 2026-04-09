@@ -1,39 +1,53 @@
 from rest_framework import viewsets
-from rest_framework.decorators import action
 from rest_framework.response import Response
 from .models import Repository
+from ..insights.models import RepoAnalysis
 from .serializers import RepositorySerializer
-from .services import fetch_and_sync_github_repos
-from rest_framework.permissions import AllowAny 
-from django.contrib.auth.models import User
-from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import filters
+from .services import fetch_github_repo_data
+from ..insights.services import generate_repo_insight 
+from rest_framework.decorators import action
 
 
 class RepositoryViewSet(viewsets.ModelViewSet):
-    queryset = Repository.objects.all()
     serializer_class = RepositorySerializer
-    filter_backends = [DjangoFilterBackend, filters.SearchFilter]
-    filterset_fields = ['language'] 
-    search_fields = ['name', 'description'] 
 
     @action(detail=False, methods=['post'])
-    def sync_github(self, request):
-        username = request.data.get('github_username')
-        
-        # 1. Check if username was provided
-        if not username:
-            return Response({"error": "github_username is required"}, status=400)
+    def analyze_new_repo(self, request):
+        repo_url = request.data.get('repo_url')
+        guest_id = request.data.get('guest_id')
 
-        user = request.user if request.user.is_authenticated else User.objects.first()
-        
-        if not user:
-            return Response({"error": "No user exists. Run 'python manage.py createsuperuser'"}, status=500)
+        if not repo_url or not guest_id:
+            return Response({"error": "I need a URL and a Guest ID!"}, status=400)
 
-        try:
-            # 3. Call the service
-            repos = fetch_and_sync_github_repos(user, username)
-            return Response({"status": "success", "count": len(repos)})
-        except Exception as e:
-            # 4. This will tell you exactly why it's crashing in the Postman response!
-            return Response({"error": str(e)}, status=500)
+        parts = repo_url.rstrip('/').split('/')
+        repo_path = f"{parts[-2]}/{parts[-1]}"
+
+        cached_analysis = RepoAnalysis.objects.filter(repo_full_name=repo_path).first()
+
+        if not cached_analysis:
+            github_data = fetch_github_repo_data(repo_path)
+            if not github_data:
+                return Response({"error": "Could not find that repo on GitHub!"}, status=404)
+
+            ai_text = generate_repo_insight(github_data)
+
+            cached_analysis = RepoAnalysis.objects.create(
+                repo_full_name=repo_path,
+                ai_summary=ai_text,
+                top_languages={"primary": github_data.get('language')}
+            )
+
+        # We record that THIS specific guest looked at this repo
+        repo_obj, _ = Repository.objects.get_or_create(
+            guest_id=guest_id,
+            full_name=repo_path,
+            defaults={
+                'name': repo_path.split('/')[-1],
+                'github_url': repo_url
+            }
+        )
+
+        return Response({
+            "repo_details": RepositorySerializer(repo_obj).data,
+            "ai_analysis": cached_analysis.ai_summary
+        })
