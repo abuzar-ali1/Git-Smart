@@ -4,7 +4,7 @@ from .models import Repository
 from ..insights.models import RepoAnalysis
 from .serializers import RepositorySerializer
 from .services import fetch_github_repo_data
-from ..insights.services import generate_repo_insight 
+from ..insights.services import analyze_repo_with_groq 
 from rest_framework.decorators import action
 
 
@@ -30,7 +30,7 @@ class RepositoryViewSet(viewsets.ModelViewSet):
         cached_analysis = RepoAnalysis.objects.filter(repo_full_name=repo_path).first()
 
         if not cached_analysis or force_refresh:
-            ai_text = generate_repo_insight(github_data)
+            ai_text = analyze_repo_with_groq(github_data)
             cached_analysis, _ = RepoAnalysis.objects.update_or_create(
                 repo_full_name=repo_path,
                 defaults={

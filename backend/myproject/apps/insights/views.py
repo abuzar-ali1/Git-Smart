@@ -4,31 +4,33 @@ from rest_framework.response import Response
 from ..repositories.models import Repository # Import the repo model
 from .models import Insight
 from .serializers import InsightSerializer
-from .services import generate_repo_insight
+from .services import analyze_repo_with_groq
 
 class InsightViewSet(viewsets.ModelViewSet):
     queryset = Insight.objects.all()
     serializer_class = InsightSerializer
 
+    # insights/views.py
+
     @action(detail=False, methods=['post'])
     def generate(self, request):
         repo_id = request.data.get('repo_id')
-        
-        if not repo_id:
-            return Response({"error": "repo_id is required"}, status=400)
-
         try:
-            # Find the repo in our database
             repo = Repository.objects.get(id=repo_id)
-            
-            # Generate the insight
-            insight = generate_repo_insight(repo)
-            
+        # Calling your Groq service
+            insight_instance = analyze_repo_with_groq(repo)
+        
+        # We MUST return the key 'ai_analysis' for Next.js to see it
             return Response({
-                "status": "success",
-                "insight": insight.analysis_text
+                "repo_details": {
+                    "name": repo.name,
+                    "owner_name": getattr(repo, 'owner_name', 'Unknown'),
+                    "stars_count": getattr(repo, 'stars_count', 0),
+                    "forks_count": getattr(repo, 'forks_count', 0),
+                    "language": getattr(repo, 'language', 'N/A'),
+                },
+                "ai_analysis": str(insight_instance.analysis_text), # Ensure this is a string
+                "refreshed": True
             })
-        except Repository.DoesNotExist:
-            return Response({"error": "Repository not found"}, status=404)
         except Exception as e:
             return Response({"error": str(e)}, status=500)

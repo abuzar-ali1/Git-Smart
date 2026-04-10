@@ -1,12 +1,15 @@
+from wsgiref import headers
+
 import requests
 
 def fetch_github_repo_data(full_name):
-    """
-    Takes 'owner/repo' and returns data from GitHub API.
-    """
     api_url = f"https://api.github.com/repos/{full_name}"
-    response = requests.get(api_url)
-    
+    headers = {"Accept": "application/vnd.github.v3+json"}
+        
+        # Add this if you generate a token!
+    headers["Authorization"] = f"token GITHUB_TOKEN" 
+        
+    response = requests.get(api_url, headers=headers)
     if response.status_code == 200:
         data = response.json()
         return {

@@ -3,3 +3,5 @@ djangorestframework
 dj-database-url
 python-dotenv
 django-cors-headers
+requests
+groq
