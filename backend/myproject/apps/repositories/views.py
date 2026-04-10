@@ -40,9 +40,13 @@ class RepositoryViewSet(viewsets.ModelViewSet):
             )
 
         defaults = {
-            'name': repo_path.split('/')[-1],
-            'github_url': repo_url,
+            'name': github_data.get('name'),
+            'owner_name': github_data.get('owner_name'),
+            'github_url': github_data.get('html_url'),
             'github_created_at': github_data.get('created_at'),
+            'stars_count': github_data.get('stars', 0),
+            'forks_count': github_data.get('forks', 0),
+            'language': github_data.get('language'),
         }
 
         repo_obj, _ = Repository.objects.get_or_create(

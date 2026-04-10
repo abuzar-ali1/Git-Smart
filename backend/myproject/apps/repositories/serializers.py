@@ -10,7 +10,11 @@ class RepositorySerializer(serializers.ModelSerializer):
             'guest_id', 
             'name', 
             'full_name', 
+            'owner_name',
             'github_url', 
             'github_created_at', 
-            'db_added_at'
+            'db_added_at',
+            'stars_count',
+            'forks_count',
+            'language'
         ]

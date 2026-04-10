@@ -14,6 +14,8 @@ def fetch_github_repo_data(full_name):
             "description": data.get("description"),
             "language": data.get("language"),
             "stars": data.get("stargazers_count"),
+            "forks": data.get("forks_count"),
+            "owner_name": data.get("owner", {}).get("login"),
             "html_url": data.get("html_url"),
             "created_at": data.get("created_at"),
         }
