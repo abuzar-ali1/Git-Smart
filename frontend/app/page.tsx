@@ -35,7 +35,7 @@ type GitHubData = {
 
 type AnalyzeResponse = {
   repo_details: GitHubData;
-  ai_analysis: string;
+  ai_analysis: any; // Changed to 'any' so TypeScript doesn't complain if an object slips through
   refreshed?: boolean;
 };
 
@@ -54,8 +54,7 @@ const staggerContainer = {
 };
 
 export default function Home() {
-  const API_BASE_URL =
-    process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000/api";
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000/api";
   const [repoUrl, setRepoUrl] = useState("");
   const [refresh, setRefresh] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -118,7 +117,6 @@ export default function Home() {
     }
   };
   
-
   // Prevent hydration mismatch on theme toggle
   if (!mounted) return null;
 
@@ -435,13 +433,11 @@ export default function Home() {
                         prose-strong:text-indigo-600 dark:prose-strong:text-indigo-400
                         prose-a:text-cyan-600 dark:prose-a:text-cyan-400"
                     >
-                      {/* Find the ReactMarkdown line (around 342) and replace it with this: */}
-
+                      {/* --- THE INDESTRUCTIBLE SAFETY NET --- */}
                       <ReactMarkdown>
-                        {typeof analysis.ai_analysis === "string"
-                          ? analysis.ai_analysis
-                          : (analysis.ai_analysis as any)?.content ||
-                            "Analysis received, but formatting is mismatched."}
+                        {typeof analysis.ai_analysis === 'string' 
+                          ? analysis.ai_analysis 
+                          : `### ⚠️ Backend Data Error\n\nThe backend sent an object instead of text. Here is the raw data:\n\n\`\`\`json\n${JSON.stringify(analysis.ai_analysis, null, 2)}\n\`\`\``}
                       </ReactMarkdown>
                     </motion.article>
                   ) : (

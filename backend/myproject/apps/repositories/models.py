@@ -5,7 +5,7 @@ class Repository(models.Model):
     
     # GitHub Data
     name = models.CharField(max_length=255)
-    full_name = models.CharField(max_length=255) 
+    full_name = models.CharField(max_length=255 , unique=True) 
     owner_name = models.CharField(max_length=255, null=True, blank=True)
     github_url = models.URLField(max_length=500)
     

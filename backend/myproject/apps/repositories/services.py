@@ -1,25 +1,29 @@
-from wsgiref import headers
-
+import os
 import requests
 
-def fetch_github_repo_data(full_name):
-    api_url = f"https://api.github.com/repos/{full_name}"
+def fetch_github_repo_data(repo_url):
+    """Fetches data from GitHub and handles rate limits."""
+    repo_url = repo_url.rstrip('/')
+    parts = repo_url.split('/')
+    if len(parts) < 2:
+        return None
+        
+    owner, repo = parts[-2], parts[-1]
+    api_url = f"https://api.github.com/repos/{owner}/{repo}"
+    
     headers = {"Accept": "application/vnd.github.v3+json"}
-        
-        # Add this if you generate a token!
-    headers["Authorization"] = f"token GITHUB_TOKEN" 
-        
-    response = requests.get(api_url, headers=headers)
-    if response.status_code == 200:
-        data = response.json()
-        return {
-            "name": data.get("name"),
-            "description": data.get("description"),
-            "language": data.get("language"),
-            "stars": data.get("stargazers_count"),
-            "forks": data.get("forks_count"),
-            "owner_name": data.get("owner", {}).get("login"),
-            "html_url": data.get("html_url"),
-            "created_at": data.get("created_at"),
-        }
-    return None
+    
+    github_token = os.environ.get("GITHUB_TOKEN")
+    if github_token:
+        headers["Authorization"] = f"Bearer {github_token}"
+    
+    try:
+        response = requests.get(api_url, headers=headers)
+        if response.status_code == 200:
+            return response.json()
+        else:
+            print(f"🚨 GITHUB ERROR: {response.status_code} - {response.text}")
+            return None
+    except Exception as e:
+        print(f"🚨 NETWORK ERROR: {str(e)}")
+        return None
